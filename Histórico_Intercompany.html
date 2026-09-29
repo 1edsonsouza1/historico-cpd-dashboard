@@ -1,0 +1,3833 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Histórico Intercompany</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+    --red:#d71920;
+    --red-soft:#fde8e8;
+    --red-dark:#a90f15;
+
+    --green:#16a34a;
+    --green-soft:#e8f7ed;
+
+    --black:#111318;
+
+    --gray:#667085;
+    --gray-chart:#667085;
+
+    --line:#e7e9ee;
+
+    --bg:#0F172A;
+
+    --white:#fff;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    min-height:100%;
+}
+
+body{
+    margin:0;
+
+    font-family:
+        Inter,
+        Segoe UI,
+        Arial,
+        sans-serif;
+
+    background:#0F172A;
+
+    color:#17191f;
+}
+
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+header{
+    background:var(--black);
+
+    color:#fff;
+
+    padding:25px 34px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+}
+
+.brand{
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+}
+
+.logo{
+    width:43px;
+    height:43px;
+
+    background:var(--red);
+
+    border-radius:11px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:900;
+
+    font-size:19px;
+}
+
+h1{
+    margin:0;
+
+    font-size:25px;
+
+    letter-spacing:-.5px;
+}
+
+.subtitle{
+    color:#b9bdc7;
+
+    margin-top:5px;
+
+    font-size:13px;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container{
+    max-width:1500px;
+
+    margin:auto;
+
+    padding:24px 30px;
+
+    background:transparent;
+}
+
+
+/* =========================
+   FILTROS
+========================= */
+
+.toolbar{
+    background:#0F172A;
+
+    border:1px solid #334155;
+
+    border-radius:14px;
+
+    padding:14px 15px;
+
+    display:grid;
+
+    grid-template-columns:
+        95px
+        150px
+        125px
+        145px
+        minmax(190px,1fr)
+        auto
+        auto
+        auto;
+
+    gap:10px;
+
+    align-items:end;
+
+    margin-bottom:18px;
+
+    box-shadow:
+        0 2px 4px rgba(0,0,0,.35),
+        0 8px 20px rgba(0,0,0,.28),
+        0 18px 35px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.field{
+    position:relative;
+
+    min-width:0;
+
+    width:100%;
+}
+
+.field label{
+    font-size:11px;
+
+    font-weight:700;
+
+    color:#94a3b8;
+
+    display:block;
+
+    margin:0 0 6px 2px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.4px;
+}
+
+
+/* =========================
+   CAMPOS DOS FILTROS
+========================= */
+
+select,
+.month-selector{
+    height:40px;
+
+    border:1px solid #d5d9e0;
+
+    border-radius:8px;
+
+    padding:0 12px;
+
+    background:#fff;
+
+    width:100%;
+
+    min-width:0;
+
+    color:#272b33;
+
+    outline:none;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+}
+
+select{
+    cursor:pointer;
+}
+
+select:focus,
+.month-selector:focus{
+    border-color:#9ca3af;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(15,23,42,.08);
+}
+
+
+/* =========================
+   SELETOR DE MÊS
+========================= */
+
+.month-selector{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    gap:12px;
+}
+
+.month-selector-text{
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    max-width:110px;
+}
+
+.month-arrow{
+    font-size:12px;
+
+    color:#667085;
+
+    transition:transform .2s;
+}
+
+.month-selector.open .month-arrow{
+    transform:rotate(180deg);
+}
+
+.month-dropdown{
+    display:none;
+
+    position:absolute;
+
+    top:calc(100% + 7px);
+
+    left:0;
+
+    width:240px;
+
+    max-height:250px;
+
+    overflow-y:auto;
+
+    background:#fff;
+
+    border:1px solid #d5d9e0;
+
+    border-radius:10px;
+
+    padding:7px;
+
+    box-shadow:
+        0 12px 28px
+        rgba(0,0,0,.18);
+
+    z-index:1000;
+}
+
+.month-dropdown.open{
+    display:block;
+}
+
+.month-option{
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    padding:9px 8px;
+
+    border-radius:7px;
+
+    font-size:13px;
+
+    color:#272b33;
+
+    cursor:pointer;
+
+    transition:background .15s;
+}
+
+.month-option:hover{
+    background:#f3f4f6;
+}
+
+.month-option input{
+    width:15px;
+
+    height:15px;
+
+    margin:0;
+
+    accent-color:var(--red);
+
+    cursor:pointer;
+}
+
+
+/* =========================
+   BOTÕES
+========================= */
+
+button{
+    border:0;
+
+    border-radius:8px;
+
+    height:40px;
+
+    padding:0 15px;
+
+    background:var(--red);
+
+    color:#fff;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+
+    transition:
+        background .2s,
+        transform .15s;
+}
+
+button:hover{
+    background:var(--red-dark);
+
+    transform:translateY(-1px);
+}
+
+button.secondary{
+    background:#eef0f3;
+
+    color:#30343b;
+}
+
+button.secondary:hover{
+    background:#dfe2e7;
+}
+
+
+/* =========================
+   ÁREA DOS GRÁFICOS
+========================= */
+
+.grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0,1fr));
+
+    gap:18px;
+
+    align-items:start;
+
+    background:transparent;
+
+    width:100%;
+}
+
+
+/* =========================
+   CARDS
+========================= */
+
+.card{
+    background:#0F172A;
+
+    border:1px solid #334155;
+
+    border-radius:14px;
+
+    padding:18px 20px;
+
+    box-shadow:
+        0 2px 4px rgba(0,0,0,.35),
+        0 8px 20px rgba(0,0,0,.28),
+        0 18px 35px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.05);
+
+    position:relative;
+
+    resize:both;
+
+    overflow:hidden;
+
+    min-width:0;
+
+    min-height:300px;
+
+    height:340px;
+
+    width:auto;
+
+    max-width:100%;
+
+    transition:
+        box-shadow .2s ease,
+        border-color .2s ease;
+}
+
+.card:hover{
+
+    border-color:#475569;
+
+    box-shadow:
+        0 3px 6px rgba(0,0,0,.38),
+        0 12px 26px rgba(0,0,0,.30),
+        0 22px 42px rgba(0,0,0,.20),
+        inset 0 1px 0 rgba(255,255,255,.06);
+
+}
+
+
+/* =========================
+   CARDS ESPECIAIS
+========================= */
+
+.card.full{
+    grid-column:1 / -1;
+
+    width:100%;
+
+    min-height:320px;
+}
+
+.card.half{
+    grid-column:span 2;
+
+    width:100%;
+}
+
+
+/*
+   Impede o resize de um card de
+   quebrar a distribuição do Grid.
+*/
+
+.card:not(.full):not(.half){
+    width:100%;
+}
+
+
+/* =========================
+   ALÇA DE REDIMENSIONAMENTO
+========================= */
+
+.card::after{
+    content:"";
+
+    position:absolute;
+
+    right:7px;
+
+    bottom:6px;
+
+    width:13px;
+
+    height:13px;
+
+    border-right:
+        2px solid #64748b;
+
+    border-bottom:
+        2px solid #64748b;
+
+    pointer-events:none;
+
+    opacity:.8;
+}
+
+
+/* =========================
+   TÍTULOS
+========================= */
+
+.card h2{
+    font-size:15px;
+
+    margin:0 0 15px;
+
+    font-weight:800;
+
+    color:#fff;
+
+    letter-spacing:-.15px;
+}
+
+.card .hint{
+    font-size:11px;
+
+    color:#94a3b8;
+
+    margin-top:-10px;
+
+    margin-bottom:10px;
+}
+
+
+/* =========================
+   ÁREA DOS GRÁFICOS
+========================= */
+
+.chartbox{
+    position:absolute;
+
+    left:20px;
+
+    right:20px;
+
+    top:65px;
+
+    bottom:20px;
+}
+
+
+/* =========================
+   RODAPÉ
+========================= */
+
+.footer{
+    text-align:center;
+
+    color:#94a3b8;
+
+    font-size:11px;
+
+    padding:20px 18px 24px;
+}
+
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media(max-width:1250px){
+
+    .toolbar{
+
+        grid-template-columns:
+            85px
+            140px
+            115px
+            135px
+            minmax(175px,1fr)
+            auto
+            auto
+            auto;
+
+        gap:10px;
+    }
+
+}
+
+
+@media(max-width:1200px){
+
+    .grid{
+
+        grid-template-columns:
+            repeat(2, minmax(0,1fr));
+
+    }
+
+    .card.half{
+
+        grid-column:span 1;
+
+        width:100%;
+
+    }
+
+
+    .toolbar{
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        align-items:flex-end;
+
+    }
+
+    .toolbar .field{
+
+        flex:0 0 auto;
+
+        width:auto;
+
+    }
+
+    .toolbar button{
+
+        flex:0 0 auto;
+
+    }
+
+
+    select,
+    .month-selector{
+
+        width:140px;
+
+        min-width:140px;
+
+    }
+
+    #fAno{
+
+        width:85px;
+
+        min-width:85px;
+
+    }
+
+    #fStatus{
+
+        width:115px;
+
+        min-width:115px;
+
+    }
+
+    #fRegional{
+
+        width:135px;
+
+        min-width:135px;
+
+    }
+
+    #fDestino{
+
+        width:175px;
+
+        min-width:175px;
+
+    }
+
+}
+
+
+@media(max-width:900px){
+
+    .grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .card,
+    .card.full,
+    .card.half{
+
+        grid-column:auto;
+
+        width:100%;
+
+    }
+
+    .toolbar{
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+    .field{
+
+        width:100%;
+
+    }
+
+    select,
+    .month-selector,
+    #fAno,
+    #fStatus,
+    #fRegional,
+    #fDestino,
+    button{
+
+        width:100%;
+
+        min-width:0;
+
+    }
+
+}
+
+
+@media(max-width:550px){
+
+    .container{
+
+        padding:15px;
+
+    }
+
+    header{
+
+        padding:20px;
+
+    }
+
+    .toolbar{
+
+        align-items:stretch;
+
+    }
+
+    .field,
+    select,
+    .month-selector,
+    button{
+
+        width:100%;
+
+    }
+
+    .card{
+
+        min-width:0;
+
+    }
+
+    .month-dropdown{
+
+        width:100%;
+
+    }
+
+}
+/* =========================================================
+   IMPRESSÃO — VERSÃO PRÓPRIA PARA PAPEL
+========================================================= */
+
+@page {
+    margin: 8mm;
+}
+
+@media print {
+
+    html,
+    body {
+        background: #ffffff !important;
+        color: #111318 !important;
+
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        margin: 0 !important;
+    }
+
+    /* =========================
+       CABEÇALHO
+    ========================= */
+
+    header {
+        background: #111318 !important;
+        color: #ffffff !important;
+
+        padding: 14px 20px !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .logo {
+        background: #d71920 !important;
+    }
+
+    .subtitle {
+        color: #d1d5db !important;
+    }
+
+    /* =========================
+       CONTAINER
+    ========================= */
+
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 12px 0 0 !important;
+
+        background: #ffffff !important;
+    }
+
+    /* Filtros não fazem sentido no papel */
+    .toolbar {
+        display: none !important;
+    }
+
+    /* =========================
+       GRADE
+    ========================= */
+
+    .grid {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+
+        width: 100% !important;
+
+        background: #ffffff !important;
+    }
+
+    /* =========================
+       CARDS
+    ========================= */
+
+    .card {
+        resize: none !important;
+
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+
+        background: #ffffff !important;
+
+        border: 1px solid #dfe3e8 !important;
+        border-radius: 8px !important;
+
+        box-shadow: none !important;
+
+        overflow: hidden !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /*
+       Mantém a lógica original:
+       cards normais = 1 coluna
+       cards half = 2 colunas
+       cards full = linha inteira
+    */
+
+    .card.half {
+        grid-column: span 2 !important;
+        width: auto !important;
+    }
+
+    .card.full {
+        grid-column: 1 / -1 !important;
+        width: auto !important;
+    }
+
+    /* Remove a alça de redimensionamento */
+    .card::after {
+        display: none !important;
+    }
+
+    /* =========================
+       TÍTULOS
+    ========================= */
+
+    .card h2 {
+        color: #111318 !important;
+    }
+
+    .card .hint {
+        color: #667085 !important;
+    }
+
+    /* =========================
+       ÁREA DOS GRÁFICOS
+    ========================= */
+
+    .chartbox {
+        position: absolute !important;
+
+        left: 20px !important;
+        right: 20px !important;
+
+        top: 65px !important;
+        bottom: 20px !important;
+
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .chartbox canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* =========================
+       RODAPÉ
+    ========================= */
+
+    .footer {
+        color: #667085 !important;
+
+        background: #ffffff !important;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="brand">
+
+<div class="logo">
+    CPD
+</div>
+
+<div>
+
+<h1>
+    Histórico Intercompany
+</h1>
+
+<div class="subtitle">
+    Acompanhamento histórico de notas intercompany
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<!-- =========================
+     FILTROS
+========================== -->
+
+<div class="toolbar">
+
+<div class="field">
+
+<label>Ano</label>
+
+<select id="fAno">
+
+    <option value="">
+        Todos
+    </option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>Mês</label>
+
+<div
+    class="month-selector"
+    id="monthSelector"
+    tabindex="0"
+    onclick="toggleMonthDropdown()">
+
+    <span
+        class="month-selector-text"
+        id="monthSelectorText">
+
+        Todos
+
+    </span>
+
+    <span class="month-arrow">
+        ▼
+    </span>
+
+</div>
+
+<div
+    class="month-dropdown"
+    id="monthDropdown">
+
+</div>
+
+</div>
+
+<div class="field">
+
+<label>Status</label>
+
+<select id="fStatus">
+
+    <option value="">
+        Todos
+    </option>
+
+    <option>
+        Pendente
+    </option>
+
+    <option>
+        Resolvida
+    </option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>Regional</label>
+
+<select id="fRegional">
+
+    <option value="">
+        Todas
+    </option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>Unidade/CD destino</label>
+
+<select id="fDestino">
+
+    <option value="">
+        Todas
+    </option>
+
+</select>
+
+</div>
+
+<button onclick="render()">
+    Aplicar filtros
+</button>
+
+<button
+ class="secondary"
+ onclick="resetFilters()">
+
+Limpar
+
+</button>
+
+<button
+ class="secondary"
+ onclick="restaurarLayout()">
+
+Restaurar tamanho dos gráficos
+
+</button>
+
+</div>
+
+<!-- =========================
+     GRÁFICOS
+========================= -->
+
+<div class="grid">
+
+<div
+    class="card"
+    id="cardStatus">
+
+<h2>
+    Status das notas
+</h2>
+
+<div class="chartbox">
+
+    <canvas id="statusChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card"
+    id="cardRegional">
+
+<h2>
+    Notas pendentes por regional
+</h2>
+
+<div class="chartbox">
+
+    <canvas id="regionalChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card"
+    id="cardTempoFaixas">
+
+<h2>
+    Faixas de tempo de resolução
+</h2>
+
+<div class="chartbox">
+
+    <canvas id="tempoFaixasChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card"
+    id="cardPendenteMes">
+
+<h2>
+    Notas pendentes por mês
+</h2>
+
+<div class="chartbox">
+
+    <canvas id="pendenteMesChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card half"
+    id="cardPendenteDestino">
+
+<h2>
+    Notas pendentes por Unidade/CD destino
+</h2>
+
+<div class="hint">
+    Quantidade de notas pendentes por Unidade/CD destino
+</div>
+
+<div class="chartbox">
+
+    <canvas id="pendenteDestinoChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card half"
+    id="cardTempo">
+
+<h2>
+    Tempo médio de resolução por Unidade/CD destino
+</h2>
+
+<div class="hint">
+    Tempo médio das notas resolvidas por Unidade/CD destino
+</div>
+
+<div class="chartbox">
+
+    <canvas id="tempoChart"></canvas>
+
+</div>
+
+
+</div>
+
+<div
+    class="card full"
+    id="cardProgress">
+
+<h2>
+    Progressão semanal de notas
+</h2>
+
+<div class="hint">
+    Evolução das notas pela data de fechamento
+</div>
+
+<div class="chartbox">
+
+    <canvas id="progressChart"></canvas>
+
+</div>
+
+
+</div>
+
+</div>
+
+<div class="footer">
+
+
+Histórico Intercompany • Análise histórica e quantitativa das notas intercompany
+
+
+</div>
+
+</div>
+
+<script src="dados_dashboard.js"></script>
+
+<script>
+
+/* =========================================================
+   CARREGAMENTO DOS DADOS
+========================================================= */
+
+let dados = (window.dashboardData || []).map(x => ({
+
+    NF: x.NF,
+
+    origem:
+        x.origem || "",
+
+    destino:
+        x.destino || "",
+
+    valor:
+        Number(x.valor) || 0,
+
+    emissao:
+        x.emissao || "",
+
+    regional:
+        x.regional || "",
+
+    status:
+        (x.status || "").trim(),
+
+    mes:
+        x.mesAno || "",
+
+    ultimaAtualizacao:
+        x.ultimaAtualizacao || "",
+
+    fechamento:
+        x.fechamento || "",
+
+    tempo:
+        x.tempoResolucao === null ||
+        x.tempoResolucao === ""
+            ? null
+            : Number(x.tempoResolucao)
+
+}));
+
+
+let statusChart;
+let regionalChart;
+let tempoFaixasChart;
+let pendenteMesChart;
+let pendenteDestinoChart;
+let tempoChart;
+let progressChart;
+
+let isPrinting = false;
+
+window.addEventListener('beforeprint', () => {
+
+    isPrinting = true;
+
+    if (statusChart) {
+
+        statusChart.data.datasets[0].borderColor = '#FFFFFF';
+
+        statusChart.update('none');
+
+        statusChart.resize();
+    }
+});
+window.addEventListener('afterprint', () => {
+
+    isPrinting = false;
+
+    if (statusChart) {
+
+        statusChart.data.datasets[0].borderColor = '#0F172A';
+
+        statusChart.update('none');
+
+        statusChart.resize();
+    }
+});
+/* =========================================================
+   FUNÇÕES AUXILIARES
+========================================================= */
+
+function unique(key){
+
+    return [
+        ...new Set(
+            dados
+                .map(x => x[key])
+                .filter(Boolean)
+        )
+    ];
+
+}
+
+
+/* =========================================================
+   EXTRAIR ANO
+========================================================= */
+
+function extrairAno(mesAno){
+
+    if(!mesAno)
+        return "";
+
+    const match =
+        String(mesAno).match(/(\d{4})/);
+
+    return match
+        ? match[1]
+        : "";
+
+}
+
+
+/* =========================================================
+   ORDENAÇÃO NUMÉRICA DAS UNIDADES
+========================================================= */
+
+function ordenarUnidadesNumerico(a, b){
+
+    const numeroA =
+        parseInt(
+            String(a).match(/^\s*(\d+)/)?.[1] || '999999',
+            10
+        );
+
+    const numeroB =
+        parseInt(
+            String(b).match(/^\s*(\d+)/)?.[1] || '999999',
+            10
+        );
+
+
+    if(numeroA !== numeroB){
+
+        return numeroA - numeroB;
+
+    }
+
+
+    return String(a).localeCompare(
+        String(b),
+        'pt-BR'
+    );
+
+}
+
+
+/* =========================================================
+   MESES SELECIONADOS
+========================================================= */
+
+function mesesSelecionados(){
+
+    return [
+        ...document.querySelectorAll(
+            '#monthDropdown input:checked'
+        )
+    ]
+    .map(
+        input => input.value
+    );
+
+}
+
+
+/* =========================================================
+   ATUALIZA TEXTO DO CAMPO MÊS
+========================================================= */
+
+function atualizarTextoMes(){
+
+    const selecionados =
+        mesesSelecionados();
+
+    const texto =
+        document.getElementById(
+            'monthSelectorText'
+        );
+
+
+    if(selecionados.length === 0){
+
+        texto.textContent = 'Todos';
+
+        return;
+
+    }
+
+
+    if(selecionados.length === 1){
+
+        texto.textContent =
+            selecionados[0];
+
+        return;
+
+    }
+
+
+    texto.textContent =
+        selecionados.length +
+        ' meses selecionados';
+
+}
+
+
+/* =========================================================
+   ABRIR / FECHAR MENU DE MESES
+========================================================= */
+
+function toggleMonthDropdown(){
+
+    const dropdown =
+        document.getElementById(
+            'monthDropdown'
+        );
+
+    const selector =
+        document.getElementById(
+            'monthSelector'
+        );
+
+
+    dropdown.classList.toggle('open');
+
+    selector.classList.toggle(
+        'open'
+    );
+
+}
+
+
+document.addEventListener(
+    'click',
+    function(event){
+
+        const selector =
+            document.getElementById(
+                'monthSelector'
+            );
+
+        const dropdown =
+            document.getElementById(
+                'monthDropdown'
+            );
+
+
+        if(
+            selector &&
+            dropdown &&
+            !selector.contains(event.target) &&
+            !dropdown.contains(event.target)
+        ){
+
+            dropdown.classList.remove(
+                'open'
+            );
+
+            selector.classList.remove(
+                'open'
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PREENCHIMENTO DOS FILTROS
+========================================================= */
+
+function fillFilters(){
+
+    /* =========================
+       ANOS
+    ========================= */
+
+    const anos = [
+
+        ...new Set(
+
+            dados
+                .map(x => extrairAno(x.mes))
+                .filter(Boolean)
+
+        )
+
+    ]
+    .sort(
+        (a,b) =>
+            Number(a) - Number(b)
+    );
+
+
+    const fAno =
+        document.getElementById(
+            'fAno'
+        );
+
+
+    anos.forEach(ano => {
+
+        const option =
+            document.createElement(
+                'option'
+            );
+
+        option.value =
+            ano;
+
+        option.textContent =
+            ano;
+
+        fAno.appendChild(
+            option
+        );
+
+    });
+
+
+    /* =========================
+       MESES
+    ========================= */
+
+    const meses =
+        unique('mes')
+        .sort(
+            (a,b) =>
+                monthIndex(a) -
+                monthIndex(b)
+        );
+
+
+    const dropdown =
+        document.getElementById(
+            'monthDropdown'
+        );
+
+
+    dropdown.innerHTML = "";
+
+
+    meses.forEach(x => {
+
+        const label =
+            document.createElement(
+                'label'
+            );
+
+        label.className =
+            'month-option';
+
+
+        const input =
+            document.createElement(
+                'input'
+            );
+
+        input.type =
+            'checkbox';
+
+        input.value =
+            x;
+
+
+        input.addEventListener(
+            'change',
+            atualizarTextoMes
+        );
+
+
+        label.appendChild(
+            input
+        );
+
+
+        const span =
+            document.createElement(
+                'span'
+            );
+
+        span.textContent =
+            x;
+
+
+        label.appendChild(
+            span
+        );
+
+
+        dropdown.appendChild(
+            label
+        );
+
+    });
+
+
+    /* =========================
+       REGIONAIS
+    ========================= */
+
+    unique('regional')
+        .sort()
+        .forEach(x => {
+
+            const option =
+                document.createElement(
+                    'option'
+                );
+
+            option.value = x;
+
+            option.textContent = x;
+
+            fRegional.appendChild(
+                option
+            );
+
+        });
+
+
+    /* =========================
+       DESTINOS
+    ========================= */
+
+    unique('destino')
+        .sort(ordenarUnidadesNumerico)
+        .forEach(x => {
+
+            const option =
+                document.createElement(
+                    'option'
+                );
+
+            option.value = x;
+
+            option.textContent = x;
+
+            fDestino.appendChild(
+                option
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+function filtered(){
+
+    const meses =
+        mesesSelecionados();
+
+
+    const ano =
+        document.getElementById(
+            'fAno'
+        ).value;
+
+
+    return dados.filter(x =>
+
+        (
+            !ano ||
+            extrairAno(x.mes) === ano
+        )
+
+        &&
+
+        (
+            meses.length === 0 ||
+            meses.includes(x.mes)
+        )
+
+        &&
+
+        (
+            !fStatus.value ||
+            x.status === fStatus.value
+        )
+
+        &&
+
+        (
+            !fRegional.value ||
+            x.regional === fRegional.value
+        )
+
+        &&
+
+        (
+            !fDestino.value ||
+            x.destino === fDestino.value
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   MÉDIA
+========================================================= */
+
+function avg(arr){
+
+    const valores =
+        arr
+            .map(x => Number(x.tempo))
+            .filter(
+                x => Number.isFinite(x)
+            );
+
+
+    return valores.length
+
+        ? valores.reduce(
+            (s,x) => s + x,
+            0
+          ) / valores.length
+
+        : 0;
+
+}
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+function dataValida(valor){
+
+    if(!valor)
+        return null;
+
+
+    const data =
+        new Date(valor);
+
+
+    return isNaN(data.getTime())
+        ? null
+        : data;
+
+}
+/* =========================================================
+   CONSOLIDAÇÃO DAS NFs PELO HISTÓRICO
+   Regra:
+   - Se a NF possui Resolvida → é considerada Resolvida
+   - Se possui Pendente e não possui Resolvida → é Pendente
+   - Cada NF é contada apenas uma vez
+========================================================= */
+
+function consolidarNFs(arr){
+
+    const statusPorNF = {};
+
+    arr.forEach(x => {
+
+        const nf =
+            String(x.NF).trim();
+
+        if(!nf)
+            return;
+
+        if(!statusPorNF[nf]){
+
+            statusPorNF[nf] = [];
+
+        }
+
+        statusPorNF[nf].push(x);
+
+    });
+
+
+    const pendentes = [];
+    const resolvidas = [];
+
+    Object.keys(statusPorNF).forEach(nf => {
+
+        const registros =
+            statusPorNF[nf];
+
+
+        const possuiResolvida =
+            registros.some(
+                x => x.status === 'Resolvida'
+            );
+
+
+        const possuiPendente =
+            registros.some(
+                x => x.status === 'Pendente'
+            );
+
+
+        /*
+           Se existe Resolvida, a NF é considerada
+           resolvida, mesmo que existam registros
+           Pendente anteriores.
+        */
+
+        if(possuiResolvida){
+
+            const registroResolvido =
+                registros.find(
+                    x => x.status === 'Resolvida'
+                );
+
+            if(registroResolvido){
+
+                resolvidas.push(
+                    registroResolvido
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        /*
+           Sem Resolvida, mas com Pendente:
+           a NF continua realmente pendente.
+        */
+
+        if(possuiPendente){
+
+            const registroPendente =
+                registros.find(
+                    x => x.status === 'Pendente'
+                );
+
+            if(registroPendente){
+
+                pendentes.push(
+                    registroPendente
+                );
+
+            }
+
+        }
+
+    });
+
+
+    return {
+
+        pendentes,
+        resolvidas
+
+    };
+
+}
+
+/* =========================================================
+   PLUGIN DO DONUT
+========================================================= */
+
+const donutLabelsPlugin = {
+
+    id:'donutLabels',
+
+    afterDraw(chart){
+
+        const meta =
+            chart.getDatasetMeta(0);
+
+        if(!meta || !meta.data.length)
+            return;
+
+
+        const ctx =
+            chart.ctx;
+
+
+        const dataset =
+            chart.data.datasets[0];
+
+
+        const valores =
+            dataset.data;
+
+
+        const total =
+            valores.reduce(
+                (s,v) => s + Number(v),
+                0
+            );
+
+
+        const center =
+            meta.data[0];
+
+
+        const x =
+            center.x;
+
+        const y =
+            center.y;
+
+
+        ctx.save();
+	ctx.globalAlpha = 1;
+	ctx.globalCompositeOperation = 'source-over';
+
+        ctx.textAlign =
+            'center';
+
+        ctx.textBaseline =
+            'middle';
+
+
+        ctx.fillStyle = isPrinting ? '#000' : '#fff';
+
+        ctx.font =
+            '800 30px Segoe UI, Arial';
+
+
+        ctx.fillText(
+            total.toLocaleString('pt-BR'),
+            x,
+            y
+        );
+
+
+        meta.data.forEach(
+            (arc,index) => {
+
+                const valor =
+                    Number(
+                        valores[index]
+                    );
+
+
+                if(valor <= 0)
+                    return;
+
+
+                const angle =
+                    (
+                        arc.startAngle +
+                        arc.endAngle
+                    ) / 2;
+
+
+                const raio =
+                    (
+                        arc.innerRadius +
+                        arc.outerRadius
+                    ) / 2;
+
+
+                const posX =
+                    arc.x +
+                    Math.cos(angle) *
+                    raio;
+
+
+                const posY =
+                    arc.y +
+                    Math.sin(angle) *
+                    raio;
+
+
+		ctx.fillStyle = isPrinting ? '#000' : '#fff';
+
+
+                ctx.font =
+                    '800 15px Segoe UI, Arial';
+
+
+                ctx.shadowColor =
+                    'rgba(0,0,0,.20)';
+
+                ctx.shadowBlur =
+                    3;
+
+
+                ctx.fillText(
+                    valor.toLocaleString(
+                        'pt-BR'
+                    ),
+                    posX,
+                    posY
+                );
+
+            }
+        );
+
+
+        ctx.restore();
+
+    }
+
+};
+
+
+/* =========================================================
+   CONFIGURAÇÃO VISUAL
+========================================================= */
+
+const chartTextColor =
+    '#475467';
+
+const chartGridColor =
+    '#e5e7eb';
+
+const chartTitleColor =
+    '#111827';
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function render(){
+
+    const arr =
+        filtered();
+
+
+    /*
+       Consolida o histórico das NFs.
+       Cada NF é contabilizada apenas uma vez.
+    */
+
+    const consolidado =
+        consolidarNFs(arr);
+
+
+    const pend =
+        consolidado.pendentes;
+
+
+    const res =
+        consolidado.resolvidas;
+
+
+    [
+        statusChart,
+        regionalChart,
+        tempoFaixasChart,
+        pendenteMesChart,
+        pendenteDestinoChart,
+        tempoChart,
+        progressChart
+    ]
+    .forEach(c => {
+
+        if(c)
+            c.destroy();
+
+    });
+
+
+    /* =====================================================
+       DONUT
+    ===================================================== */
+
+    statusChart =
+        new Chart(
+
+            document.getElementById(
+                'statusChart'
+            ),
+
+            {
+
+                type:'doughnut',
+
+                data:{
+
+                    labels:[
+                        'Pendentes',
+                        'Resolvidas'
+                    ],
+
+                    datasets:[{
+
+                        data:[
+                            pend.length,
+                            res.length
+                        ],
+
+                        backgroundColor:[
+                            '#d71920',
+                            '#16a34a'
+                        ],
+
+                        borderColor: isPrinting ? '#ffffff' : '#0F172A',
+			borderWidth: 3,
+
+                    }]
+
+                },
+
+                plugins:[
+                    donutLabelsPlugin
+                ],
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    cutout:'67%',
+
+                    layout:{
+                        padding:10
+                    },
+
+                    plugins:{
+
+                        legend:{
+
+                            position:'bottom',
+
+                            labels:{
+                                padding:18,
+
+                                usePointStyle:true,
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+                                    size:12,
+                                    weight:'600'
+                                }
+                            }
+
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        const valor =
+                                            context.raw;
+
+                                        const total =
+                                            context.dataset.data
+                                                .reduce(
+                                                    (a,b) =>
+                                                        a + b,
+                                                    0
+                                                );
+
+
+                                        const percentual =
+                                            total
+                                                ? (
+                                                    valor /
+                                                    total *
+                                                    100
+                                                )
+                                                : 0;
+
+
+                                        return (
+                                            context.label +
+                                            ': ' +
+                                            valor.toLocaleString(
+                                                'pt-BR'
+                                            ) +
+                                            ' notas (' +
+                                            percentual.toLocaleString(
+                                                'pt-BR',
+                                                {
+                                                    minimumFractionDigits:1,
+                                                    maximumFractionDigits:1
+                                                }
+                                            ) +
+                                            '%)'
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+    /* =====================================================
+       REGIONAL
+    ===================================================== */
+
+    const regs = [
+
+        ...new Set(
+
+            pend
+                .map(x => x.regional)
+                .filter(Boolean)
+
+        )
+
+    ]
+    .sort();
+
+
+    regionalChart =
+        new Chart(
+
+            document.getElementById(
+                'regionalChart'
+            ),
+
+            {
+
+                type:'bar',
+
+                data:{
+
+                    labels:regs,
+
+                    datasets:[{
+
+                        label:
+                            'Notas pendentes',
+
+                        data:
+                            regs.map(
+                                r =>
+                                    pend.filter(
+                                        x =>
+                                            x.regional === r
+                                    ).length
+                            ),
+
+                        backgroundColor:
+                            '#d71920',
+
+                        borderRadius:6
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        return (
+                                            context.parsed.y
+                                                .toLocaleString(
+                                                    'pt-BR'
+                                                ) +
+                                            ' notas'
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+                                precision:0,
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                color:
+                                    chartGridColor,
+                                drawBorder:false
+                            },
+
+                            title:{
+                                display:true,
+                                text:
+                                    'Quantidade de notas',
+                                color:
+                                    chartTextColor,
+                                font:{
+                                    size:11,
+                                    weight:'600'
+                                }
+                            }
+
+                        },
+
+                        x:{
+
+                            ticks:{
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+    /* =====================================================
+       FAIXAS DE TEMPO
+    ===================================================== */
+
+    const faixas = [
+
+        '0–7 dias',
+        '8–15 dias',
+        '16–30 dias',
+        '31–60 dias',
+        '+60 dias'
+
+    ];
+
+
+    const quantidadeFaixas = [
+        0,
+        0,
+        0,
+        0,
+        0
+    ];
+
+
+    res.forEach(x => {
+
+        const tempo =
+            Number(x.tempo);
+
+
+        if(!Number.isFinite(tempo))
+            return;
+
+
+        if(tempo <= 7){
+
+            quantidadeFaixas[0]++;
+
+        }
+        else if(tempo <= 15){
+
+            quantidadeFaixas[1]++;
+
+        }
+        else if(tempo <= 30){
+
+            quantidadeFaixas[2]++;
+
+        }
+        else if(tempo <= 60){
+
+            quantidadeFaixas[3]++;
+
+        }
+        else{
+
+            quantidadeFaixas[4]++;
+
+        }
+
+    });
+
+
+    tempoFaixasChart =
+        new Chart(
+
+            document.getElementById(
+                'tempoFaixasChart'
+            ),
+
+            {
+
+                type:'bar',
+
+                data:{
+
+                    labels:faixas,
+
+                    datasets:[{
+
+                        label:
+                            'Notas resolvidas',
+
+                        data:
+                            quantidadeFaixas,
+
+                        backgroundColor:
+                            '#16a34a',
+
+                        borderRadius:6
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        return (
+                                            context.parsed.y
+                                                .toLocaleString(
+                                                    'pt-BR'
+                                                ) +
+                                            ' notas'
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+                                precision:0,
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                color:
+                                    chartGridColor,
+                                drawBorder:false
+                            },
+
+                            title:{
+
+                                display:true,
+
+                                text:
+                                    'Quantidade',
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+                                    size:11,
+                                    weight:'600'
+                                }
+
+                            }
+
+                        },
+
+                        x:{
+
+                            ticks:{
+
+                                font:{
+                                    size:10
+                                },
+
+                                color:
+                                    chartTextColor
+
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+// =====================================================
+// NOTAS PENDENTES POR MÊS
+// Usa a mesma consolidação histórica dos demais gráficos.
+// =====================================================
+
+const pendentesMes = {};
+
+pend.forEach(x => {
+
+    const mes =
+        x.mes || 'Sem mês';
+
+
+    if(!pendentesMes[mes]){
+
+        pendentesMes[mes] = 0;
+
+    }
+
+
+    pendentesMes[mes]++;
+
+});
+
+
+const mesesPendentes =
+    Object.keys(pendentesMes)
+        .sort(
+            (a,b) =>
+                monthIndex(a) -
+                monthIndex(b)
+        );
+
+
+const valoresPendentesMes =
+    mesesPendentes.map(
+        mes =>
+            pendentesMes[mes]
+    );
+
+    pendenteMesChart =
+        new Chart(
+
+            document.getElementById(
+                'pendenteMesChart'
+            ),
+
+            {
+
+                type:'bar',
+
+                data:{
+
+                    labels:
+                        mesesPendentes,
+
+                    datasets:[{
+
+                        label:
+                            'Notas pendentes',
+
+                        data:
+                            valoresPendentesMes,
+
+                        backgroundColor:
+                            '#d71920',
+
+                        borderRadius:6
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        return (
+                                            context.parsed.y
+                                                .toLocaleString(
+                                                    'pt-BR'
+                                                ) +
+                                            ' notas'
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+                                precision:0,
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                color:
+                                    chartGridColor,
+                                drawBorder:false
+                            },
+
+                            title:{
+
+                                display:true,
+
+                                text:
+                                    'Quantidade',
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+                                    size:11,
+                                    weight:'600'
+                                }
+
+                            }
+
+                        },
+
+                        x:{
+
+                            ticks:{
+
+                                autoSkip:true,
+
+                                maxRotation:45,
+
+                                minRotation:0,
+
+                                font:{
+                                    size:9
+                                },
+
+                                color:
+                                    chartTextColor
+
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+    /* =====================================================
+       NOTAS PENDENTES POR UNIDADE/CD DESTINO
+    ===================================================== */
+
+    const pendentesPorDestino = {};
+
+
+    pend.forEach(x => {
+
+        if(!x.destino)
+            return;
+
+
+        const destino =
+            x.destino;
+
+
+        if(!pendentesPorDestino[destino]){
+
+            pendentesPorDestino[destino] = 0;
+
+        }
+
+
+        pendentesPorDestino[destino]++;
+
+    });
+
+
+    const pendentesDestinos =
+
+        Object.keys(
+            pendentesPorDestino
+        )
+
+        .map(destino => ({
+
+            destino:destino,
+
+            quantidade:
+                pendentesPorDestino[destino]
+
+        }))
+
+        .sort(
+            (a,b) => {
+
+                return ordenarUnidadesNumerico(
+                    a.destino,
+                    b.destino
+                );
+
+            }
+        );
+
+
+    pendenteDestinoChart =
+        new Chart(
+
+            document.getElementById(
+                'pendenteDestinoChart'
+            ),
+
+            {
+
+                type:'bar',
+
+                data:{
+
+                    labels:
+                        pendentesDestinos.map(
+                            x => x.destino
+                        ),
+
+                    datasets:[{
+
+                        label:
+                            'Notas pendentes',
+
+                        data:
+                            pendentesDestinos.map(
+                                x =>
+                                    x.quantidade
+                            ),
+
+                        backgroundColor:
+                            '#d71920',
+
+                        borderColor:
+                            '#d71920',
+
+                        borderWidth:1,
+
+                        borderRadius:6
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    indexAxis:'y',
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        return (
+
+                                            context.parsed.x
+                                                .toLocaleString(
+                                                    'pt-BR'
+                                                )
+
+                                            + ' notas'
+
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        x:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+
+                                precision:0,
+
+                                color:
+                                    chartTextColor
+
+                            },
+
+                            grid:{
+
+                                color:
+                                    chartGridColor,
+
+                                drawBorder:false
+
+                            },
+
+                            title:{
+
+                                display:true,
+
+                                text:
+                                    'Quantidade de notas',
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+
+                                    size:11,
+
+                                    weight:'600'
+
+                                }
+
+                            }
+
+                        },
+
+                        y:{
+
+                            ticks:{
+
+                                autoSkip:false,
+
+                                color:
+                                    chartTextColor
+
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+    /* =====================================================
+       TEMPO MÉDIO POR DESTINO
+    ===================================================== */
+
+    const tempoPorDestino = {};
+
+
+    res.forEach(x => {
+
+        if(
+
+            !x.destino ||
+
+            x.tempo === null ||
+
+            !Number.isFinite(
+                Number(x.tempo)
+            )
+
+        ){
+
+            return;
+
+        }
+
+
+        const destino =
+            x.destino;
+
+
+        const tempo =
+            Number(x.tempo);
+
+
+        if(
+            !tempoPorDestino[destino]
+        ){
+
+            tempoPorDestino[destino] = {
+
+                soma:0,
+
+                quantidade:0
+
+            };
+
+        }
+
+
+        tempoPorDestino[destino].soma
+            += tempo;
+
+
+        tempoPorDestino[destino].quantidade++;
+
+    });
+
+
+    const tempoDestinos =
+
+        Object.keys(
+            tempoPorDestino
+        )
+
+        .map(destino => ({
+
+            destino:destino,
+
+            media:
+                tempoPorDestino[destino].soma /
+                tempoPorDestino[destino].quantidade
+
+        }))
+
+        .sort(
+            (a,b) => {
+
+                return ordenarUnidadesNumerico(
+                    a.destino,
+                    b.destino
+                );
+
+            }
+        );
+
+
+    tempoChart =
+        new Chart(
+
+            document.getElementById(
+                'tempoChart'
+            ),
+
+            {
+
+                type:'bar',
+
+                data:{
+
+                    labels:
+                        tempoDestinos.map(
+                            x => x.destino
+                        ),
+
+                    datasets:[{
+
+                        label:
+                            'Tempo médio de resolução (dias)',
+
+                        data:
+                            tempoDestinos.map(
+                                x =>
+                                    Number(
+                                        x.media.toFixed(2)
+                                    )
+                            ),
+
+                        backgroundColor:
+                            '#16a34a',
+
+                        borderColor:
+                            '#16a34a',
+
+                        borderWidth:1,
+
+                        borderRadius:6
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    indexAxis:'y',
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    function(context){
+
+                                        return (
+
+                                            context.parsed.x
+                                                .toLocaleString(
+                                                    'pt-BR',
+                                                    {
+                                                        minimumFractionDigits:2,
+                                                        maximumFractionDigits:2
+                                                    }
+                                                )
+
+                                            + ' dias'
+
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        x:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                color:
+                                    chartGridColor,
+                                drawBorder:false
+                            },
+
+                            title:{
+
+                                display:true,
+
+                                text:'Dias',
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+                                    size:11,
+                                    weight:'600'
+                                }
+
+                            }
+
+                        },
+
+                        y:{
+
+                            ticks:{
+                                autoSkip:false,
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+    /* =====================================================
+       PROGRESSÃO SEMANAL
+    ===================================================== */
+
+    const datas = {};
+
+
+    arr.forEach(x => {
+
+        const data =
+            dataValida(
+                x.fechamento
+            );
+
+
+        if(!data)
+            return;
+
+
+        const chave =
+
+            data.getFullYear() +
+            "-" +
+
+            String(
+                data.getMonth() + 1
+            )
+            .padStart(2,'0') +
+
+            "-" +
+
+            String(
+                data.getDate()
+            )
+            .padStart(2,'0');
+
+
+        if(!datas[chave]){
+
+            datas[chave] = {
+
+                data:data,
+
+                pendentes:0,
+
+                resolvidas:0
+
+            };
+
+        }
+
+
+        if(
+            x.status === "Pendente"
+        ){
+
+            datas[chave].pendentes++;
+
+        }
+
+
+        if(
+            x.status === "Resolvida"
+        ){
+
+            datas[chave].resolvidas++;
+
+        }
+
+    });
+
+
+    const datasOrdenadas =
+
+        Object.keys(datas)
+
+        .sort(
+            (a,b) =>
+                datas[a].data -
+                datas[b].data
+        );
+
+
+    const labelsDatas =
+
+        datasOrdenadas.map(
+            chave =>
+
+                datas[chave]
+                    .data
+                    .toLocaleDateString(
+                        'pt-BR'
+                    )
+        );
+
+
+    const valoresPendentes =
+
+        datasOrdenadas.map(
+            chave =>
+                datas[chave].pendentes
+        );
+
+
+    const valoresResolvidas =
+
+        datasOrdenadas.map(
+            chave =>
+                datas[chave].resolvidas
+        );
+
+
+    progressChart =
+
+        new Chart(
+
+            document.getElementById(
+                'progressChart'
+            ),
+
+            {
+
+                type:'line',
+
+                data:{
+
+                    labels:labelsDatas,
+
+                    datasets:[
+
+                        {
+
+                            label:'Pendentes',
+
+                            data:
+                                valoresPendentes,
+
+                            borderColor:
+                                '#d71920',
+
+                            backgroundColor:
+                                '#d71920',
+
+                            tension:.35,
+
+                            fill:false,
+
+                            pointRadius:5,
+
+                            pointHoverRadius:7
+
+                        },
+
+
+                        {
+
+                            label:'Resolvidas',
+
+                            data:
+                                valoresResolvidas,
+
+                            borderColor:
+                                '#16a34a',
+
+                            backgroundColor:
+                                '#16a34a',
+
+                            tension:.35,
+
+                            fill:false,
+
+                            pointRadius:5,
+
+                            pointHoverRadius:7
+
+                        }
+
+                    ]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    plugins:{
+
+                        legend:{
+
+                            position:'bottom',
+
+                            labels:{
+                                color:
+                                    chartTextColor,
+                                usePointStyle:true,
+                                font:{
+                                    size:12,
+                                    weight:'600'
+                                }
+                            }
+
+                        },
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                title:
+                                    function(context){
+
+                                        return (
+                                            'Data de fechamento: ' +
+                                            context[0].label
+                                        );
+
+                                    },
+
+                                label:
+                                    function(context){
+
+                                        return (
+
+                                            context.dataset.label +
+                                            ': ' +
+                                            context.parsed.y +
+                                            ' notas'
+
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+                                precision:0,
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                color:
+                                    chartGridColor,
+                                drawBorder:false
+                            },
+
+                            title:{
+
+                                display:true,
+
+                                text:
+                                    'Quantidade de notas',
+
+                                color:
+                                    chartTextColor,
+
+                                font:{
+                                    size:11,
+                                    weight:'600'
+                                }
+
+                            }
+
+                        },
+
+                        x:{
+
+                            ticks:{
+                                color:
+                                    chartTextColor
+                            },
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+}
+
+
+/* =========================================================
+   ORDEM DOS MESES
+========================================================= */
+
+function monthIndex(m){
+
+    const meses = [
+
+        'Janeiro 2026',
+        'Fevereiro 2026',
+        'Março 2026',
+        'Abril 2026',
+        'Maio 2026',
+        'Junho 2026',
+        'Julho 2026',
+        'Agosto 2026',
+        'Setembro 2026',
+        'Outubro 2026',
+        'Novembro 2026',
+        'Dezembro 2026'
+
+    ];
+
+
+    return meses.indexOf(m);
+
+}
+
+
+/* =========================================================
+   LIMPAR FILTROS
+========================================================= */
+
+function resetFilters(){
+
+    document
+        .querySelectorAll(
+            '#monthDropdown input'
+        )
+        .forEach(
+            input =>
+                input.checked = false
+        );
+
+
+    atualizarTextoMes();
+
+
+    document.getElementById(
+        'fAno'
+    ).value = '';
+
+
+    document.getElementById(
+        'fStatus'
+    ).value = '';
+
+    document.getElementById(
+        'fRegional'
+    ).value = '';
+
+    document.getElementById(
+        'fDestino'
+    ).value = '';
+
+    render();
+
+}
+
+
+/* =========================================================
+   SALVAR TAMANHOS
+========================================================= */
+
+function salvarTamanhos(){
+
+    const cards =
+        document.querySelectorAll(
+            '.card'
+        );
+
+
+    const tamanhos = {};
+
+
+    cards.forEach(card => {
+
+        const id =
+            card.id;
+
+
+        if(!id)
+            return;
+
+
+        tamanhos[id] = {
+
+            height:
+                card.offsetHeight
+
+        };
+
+    });
+
+
+    localStorage.setItem(
+
+        'dashboardCardSizes',
+
+        JSON.stringify(tamanhos)
+
+    );
+
+}
+
+
+/* =========================================================
+   RESTAURAR TAMANHOS
+========================================================= */
+
+function restaurarTamanhos(){
+
+    const salvo =
+        localStorage.getItem(
+            'dashboardCardSizes'
+        );
+
+
+    if(!salvo)
+        return;
+
+
+    let tamanhos;
+
+
+    try{
+
+        tamanhos =
+            JSON.parse(salvo);
+
+    }
+    catch(e){
+
+        return;
+
+    }
+
+
+    const cards =
+        document.querySelectorAll(
+            '.card'
+        );
+
+
+    cards.forEach(card => {
+
+        const id =
+            card.id;
+
+
+        if(
+            !id ||
+            !tamanhos[id]
+        ){
+
+            return;
+
+        }
+
+
+        const largura =
+            Number(
+                tamanhos[id].width
+            );
+
+
+        const altura =
+            Number(
+                tamanhos[id].height
+            );
+
+
+        /*
+           Somente aplica a largura salva
+           quando ela não ultrapassa
+           a largura disponível do card.
+        */
+
+
+        if(
+            Number.isFinite(altura) &&
+            altura >= 300
+        ){
+
+            card.style.height =
+                altura + 'px';
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   RESTAURAR LAYOUT ORIGINAL
+========================================================= */
+
+function restaurarLayout(){
+
+    localStorage.removeItem(
+        'dashboardCardSizes'
+    );
+
+
+    const cards =
+        document.querySelectorAll(
+            '.card'
+        );
+
+
+    cards.forEach(card => {
+
+        card.style.width =
+            '';
+
+        card.style.height =
+            '';
+
+    });
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   MONITORAR REDIMENSIONAMENTO
+========================================================= */
+
+function ativarRedimensionamento(){
+
+    const cards =
+        document.querySelectorAll(
+            '.card'
+        );
+
+
+    cards.forEach(card => {
+
+        let timer;
+
+
+        const observer =
+            new ResizeObserver(() => {
+
+                clearTimeout(timer);
+
+
+                timer =
+                    setTimeout(
+                        () => {
+
+                            salvarTamanhos();
+
+                        },
+                        250
+                    );
+
+            });
+
+
+        observer.observe(card);
+
+    });
+
+}
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+fillFilters();
+
+restaurarTamanhos();
+
+render();
+
+ativarRedimensionamento();
+
+</script>
+
+</body>
+</html>
