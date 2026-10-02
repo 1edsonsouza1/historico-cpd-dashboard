@@ -1724,15 +1724,8 @@ function fillFilters(){
 
 function filtered(){
 
-    const meses =
-        mesesSelecionados();
-
-
-    const ano =
-        document.getElementById(
-            'fAno'
-        ).value;
-
+    const meses = mesesSelecionados();
+    const ano = document.getElementById('fAno').value;
 
     return dados.filter(x =>
 
@@ -1746,13 +1739,6 @@ function filtered(){
         (
             meses.length === 0 ||
             meses.includes(x.mes)
-        )
-
-        &&
-
-        (
-            !fStatus.value ||
-            x.status === fStatus.value
         )
 
         &&
@@ -1772,7 +1758,6 @@ function filtered(){
     );
 
 }
-
 
 /* =========================================================
    MÉDIA
@@ -1829,108 +1814,78 @@ function dataValida(valor){
 
 function consolidarNFs(arr){
 
-    const statusPorNF = {};
+    const statusPorChave = {};
 
     arr.forEach(x => {
 
-        const nf =
-            String(x.NF).trim();
+        const nf = String(x.NF).trim();
+        const destino = String(x.destino).trim();
 
-        if(!nf)
-            return;
+        if(!nf) return;
 
-        if(!statusPorNF[nf]){
+        // Chave composta: Destino + NF
+        const chave = `${destino}_${nf}`;
 
-            statusPorNF[nf] = [];
-
+        if(!statusPorChave[chave]){
+            statusPorChave[chave] = [];
         }
 
-        statusPorNF[nf].push(x);
+        statusPorChave[chave].push(x);
 
     });
-
 
     const pendentes = [];
     const resolvidas = [];
 
-    Object.keys(statusPorNF).forEach(nf => {
+    Object.keys(statusPorChave).forEach(chave => {
 
-        const registros =
-            statusPorNF[nf];
+        const registros = statusPorChave[chave];
 
+        const possuiResolvida = registros.some(
+            x => x.status === 'Resolvida'
+        );
 
-        const possuiResolvida =
-            registros.some(
+        const possuiPendente = registros.some(
+            x => x.status === 'Pendente'
+        );
+
+        /*
+           Se existe Resolvida na chave (Destino + NF),
+           a NF é considerada resolvida.
+        */
+        if(possuiResolvida){
+            const registroResolvido = registros.find(
                 x => x.status === 'Resolvida'
             );
 
-
-        const possuiPendente =
-            registros.some(
-                x => x.status === 'Pendente'
-            );
-
-
-        /*
-           Se existe Resolvida, a NF é considerada
-           resolvida, mesmo que existam registros
-           Pendente anteriores.
-        */
-
-        if(possuiResolvida){
-
-            const registroResolvido =
-                registros.find(
-                    x => x.status === 'Resolvida'
-                );
-
             if(registroResolvido){
-
-                resolvidas.push(
-                    registroResolvido
-                );
-
+                resolvidas.push(registroResolvido);
             }
-
             return;
-
         }
-
 
         /*
            Sem Resolvida, mas com Pendente:
-           a NF continua realmente pendente.
+           continua pendente.
         */
-
         if(possuiPendente){
-
-            const registroPendente =
-                registros.find(
-                    x => x.status === 'Pendente'
-                );
+            const registroPendente = registros.find(
+                x => x.status === 'Pendente'
+            );
 
             if(registroPendente){
-
-                pendentes.push(
-                    registroPendente
-                );
-
+                pendentes.push(registroPendente);
             }
-
         }
 
     });
 
-
     return {
-
         pendentes,
         resolvidas
-
     };
 
-}
-
+} 
 /* =========================================================
    PLUGIN DO DONUT
 ========================================================= */
@@ -2094,25 +2049,23 @@ const chartTitleColor =
 
 function render(){
 
-    const arr =
-        filtered();
+    // 1. Aplica filtros gerais (Ano, Mês, Regional, Destino)
+    const arr = filtered();
 
+    // 2. Consolida o histórico completo (com base na chave Destino + NF)
+    const consolidado = consolidarNFs(arr);
 
-    /*
-       Consolida o histórico das NFs.
-       Cada NF é contabilizada apenas uma vez.
-    */
+    // 3. Aplica o filtro do campo Status após a consolidação
+    const statusFiltro = document.getElementById('fStatus').value;
 
-    const consolidado =
-        consolidarNFs(arr);
+    let pend = consolidado.pendentes;
+    let res = consolidado.resolvidas;
 
-
-    const pend =
-        consolidado.pendentes;
-
-
-    const res =
-        consolidado.resolvidas;
+    if (statusFiltro === 'Pendente') {
+        res = [];
+    } else if (statusFiltro === 'Resolvida') {
+        pend = [];
+    }
 
 
     [
